@@ -6,7 +6,7 @@ class UserProfile(AbstractUser):
     class UserType(models.TextChoices):
         PUBLIC = 'public', 'Public'
         ARTIST = 'artist', 'Artist'
-        ADMIN = 'admin', 'Admin'  # podes expandir no futuro
+        #ADMIN = 'admin', 'Admin' 
 
     # Campos personalizados
     name = models.CharField(max_length=100)
