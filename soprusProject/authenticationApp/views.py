@@ -47,7 +47,7 @@ def sign_up(request):
         messages.success(request, "Conta criada com sucesso! Pode agora iniciar sessão.")
         return redirect('sign_in')
 
-    return render(request, 'sign_up.html')
+    return render(request, 'authenticationApp/sign_up.html')
 
 @csrf_protect
 def sign_in(request):
@@ -64,10 +64,14 @@ def sign_in(request):
         else:
             messages.error(request, "Credenciais inválidas. Tente novamente.")
 
-    return render(request, 'sign_in.html')
+    return render(request, 'authenticationApp/sign_in.html')
 
 @login_required
 def user_logout(request):
     logout(request)
     messages.success(request, "Logout efetuado com sucesso.")
     return redirect('sign_in')
+
+@login_required
+def dashboard(request):
+    return render(request, 'authenticationApp/dashboard.html')

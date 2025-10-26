@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Dashboard</title>
+</head>
+<body>
+    <h2>Bem-vindo, {{ user.username }}!</h2>
+
+    {% if messages %}
+        <ul>
+            {% for message in messages %}
+                <li>{{ message }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+
+    <p>Este é o teu painel.</p>
+    <a href="{% url 'user_logout' %}">Terminar Sessão</a>
+</body>
+</html>

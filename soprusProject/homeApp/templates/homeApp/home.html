@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Bem-vindo ao Soprus</title>
+</head>
+<body>
+    <h1>Bem-vindo à nossa plataforma!</h1>
+    <p>Por favor, autentique-se para continuar:</p>
+
+    <a href="{% url 'sign_in' %}">
+        <button>Iniciar Sessão</button>
+    </a>
+    <a href="{% url 'sign_up' %}">
+        <button>Criar Conta</button>
+    </a>
+</body>
+</html>
