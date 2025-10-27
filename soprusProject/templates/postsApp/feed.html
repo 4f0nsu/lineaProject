@@ -1,0 +1,30 @@
+{% block content %}
+<h2>Feed</h2>
+
+<a href="{% url 'posts:create' %}">Criar novo post</a>
+
+<hr>
+{% for post in posts %}
+  <div style="border:1px solid #ddd; padding:10px; margin-bottom:10px;">
+    <p><strong>{{ post.creator.username }}</strong> — {{ post.created_at|date:"d M Y H:i" }}</p>
+    <p>{{ post.description }}</p>
+
+    {% if post.media.all %}
+      {% for m in post.media.all %}
+        {% if m.media_type == 'image' %}
+          <img src="{{ m.file.url }}" alt="Imagem" width="300">
+        {% elif m.media_type == 'video' %}
+          <video width="320" height="240" controls>
+            <source src="{{ m.file.url }}" type="video/mp4">
+          </video>
+        {% endif %}
+      {% endfor %}
+    {% endif %}
+
+    <p>❤️ {{ post.likes.count }} likes</p>
+    <a href="{% url 'posts:detail' post.id %}">Ver detalhes</a>
+  </div>
+{% empty %}
+  <p>Não há posts ainda.</p>
+{% endfor %}
+{% endblock %}

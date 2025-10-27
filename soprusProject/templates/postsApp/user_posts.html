@@ -1,0 +1,21 @@
+{% block content %}
+<h2>Posts de {{ view.kwargs.username }}</h2>
+
+{% for post in posts %}
+  <div style="border:1px solid #ddd; padding:10px; margin-bottom:10px;">
+    <p>{{ post.description }}</p>
+    {% for m in post.media.all %}
+      {% if m.media_type == 'image' %}
+        <img src="{{ m.file.url }}" width="300">
+      {% elif m.media_type == 'video' %}
+        <video width="320" height="240" controls>
+          <source src="{{ m.file.url }}" type="video/mp4">
+        </video>
+      {% endif %}
+    {% endfor %}
+    <p><a href="{% url 'posts:detail' post.id %}">Ver detalhes</a></p>
+  </div>
+{% empty %}
+  <p>Este utilizador ainda não publicou nada.</p>
+{% endfor %}
+{% endblock %}

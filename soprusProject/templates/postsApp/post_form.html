@@ -1,0 +1,13 @@
+{% block content %}
+<h2>Criar Post</h2>
+
+<form method="POST" enctype="multipart/form-data">
+  {% csrf_token %}
+  {{ form.as_p }}
+  <label>Media (imagem/video):</label>
+  <input type="file" name="media_files" multiple>
+  <button type="submit">Publicar</button>
+</form>
+
+<a href="{% url 'posts:feed' %}">Voltar ao feed</a>
+{% endblock %}

@@ -1,0 +1,11 @@
+{% block content %}
+<h2>Apagar Post</h2>
+
+<p>Tens a certeza que queres apagar este post?</p>
+
+<form method="POST">
+  {% csrf_token %}
+  <button type="submit">Sim, apagar</button>
+  <a href="{% url 'posts:detail' object.id %}">Cancelar</a>
+</form>
+{% endblock %}

@@ -1,0 +1,51 @@
+{% block content %}
+<h2>Post de {{ post.creator.username }}</h2>
+
+<p>{{ post.description }}</p>
+
+{% for m in post.media.all %}
+  {% if m.media_type == 'image' %}
+    <img src="{{ m.file.url }}" width="300">
+  {% elif m.media_type == 'video' %}
+    <video width="320" height="240" controls>
+      <source src="{{ m.file.url }}" type="video/mp4">
+    </video>
+  {% endif %}
+{% endfor %}
+
+<p>{{ post.likes.count }} ❤️</p>
+
+<form method="POST" action="{% url 'posts:like' post.id %}">
+  {% csrf_token %}
+  <button type="submit">
+    {% if liked %}Remover Like{% else %}Dar Like{% endif %}
+  </button>
+</form>
+
+<hr>
+
+<h3>Comentários</h3>
+{% for comment in comments %}
+  <div style="margin-bottom:5px;">
+    <strong>{{ comment.user.username }}:</strong> {{ comment.text }}
+  </div>
+{% empty %}
+  <p>Sem comentários.</p>
+{% endfor %}
+
+<form method="POST" action="{% url 'posts:comment' post.id %}">
+  {% csrf_token %}
+  {{ comment_form.as_p }}
+  <button type="submit">Comentar</button>
+</form>
+
+{% if post.creator == user %}
+  <hr>
+  <form method="POST" action="{% url 'posts:delete' post.id %}">
+    {% csrf_token %}
+    <button type="submit" style="color:red;">Apagar Post</button>
+  </form>
+{% endif %}
+
+<a href="{% url 'posts:feed' %}">Voltar</a>
+{% endblock %}

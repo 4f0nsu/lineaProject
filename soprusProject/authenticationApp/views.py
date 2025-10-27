@@ -92,7 +92,10 @@ def sign_in(request):
             login(request, user)
             request.session.set_expiry(3600)  # Sessão expira após 1h de inatividade
             messages.success(request, f"Bem-vindo {user.username}!")
-            return redirect('dashboard')
+            #return redirect('dashboard')
+            
+            # Redireciona para o feed de posts
+            return redirect('posts:feed')  # <- aqui muda para a view do feed
         else:
             messages.error(request, "Credenciais inválidas. Tente novamente.")
 
