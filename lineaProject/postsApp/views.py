@@ -72,7 +72,7 @@ class PostCreateView(CreateView):
         for f in files:
             Media.objects.create(
                 post=self.object,
-                file_url=f,  # ou file=f se o campo Media for FileField/ImageField
+                file=f,  # ou file=f se o campo Media for FileField/ImageField
                 media_type=form.cleaned_data['content_type']
             )
 
