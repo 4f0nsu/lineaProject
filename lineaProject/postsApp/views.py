@@ -55,7 +55,6 @@ class PostDetailView(DetailView):
 
 
 # CRIAR UM NOVO POST
-
 @method_decorator(login_required, name='dispatch')
 class PostCreateView(CreateView):
     model = Post

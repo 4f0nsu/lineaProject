@@ -19,7 +19,6 @@ class Post(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        db_table = 'posts_post'
         ordering = ['-created_at']
 
     def __str__(self):
@@ -50,7 +49,6 @@ class Media(models.Model):
     order = models.PositiveIntegerField(default=0)  # útil para carrosséis
 
     class Meta:
-        db_table = 'posts_media'
         ordering = ['order']
 
     def __str__(self):
@@ -72,7 +70,6 @@ class Like(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        db_table = 'posts_like'
         unique_together = ('user', 'post')
 
     def __str__(self):
@@ -102,7 +99,6 @@ class Comment(models.Model):
     )
 
     class Meta:
-        db_table = 'posts_comment'
         ordering = ['created_at']
 
     def __str__(self):
@@ -124,45 +120,11 @@ class Follow(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        db_table = 'users_follow'
         unique_together = ('follower', 'followed')
 
     def __str__(self):
         return f"{self.follower.username} → {self.followed.username}"
-
-
-
-class Hashtag(models.Model):
-    name = models.CharField(max_length=100, unique=True, db_index=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-
-    class Meta:
-        db_table = 'posts_hashtag'
-        ordering = ['name']
-
-    def __str__(self):
-        return f"#{self.name}"
-
-class PostHashtag(models.Model):
-    post = models.ForeignKey(
-        Post,
-        on_delete=models.CASCADE,
-        related_name='hashtags'
-    )
-    hashtag = models.ForeignKey(
-        Hashtag,
-        on_delete=models.CASCADE,
-        related_name='posts'
-    )
-
-    class Meta:
-        db_table = 'posts_post_hashtag'
-        unique_together = ('post', 'hashtag')
-
-    def __str__(self):
-        return f"{self.post.id} ↔ {self.hashtag.name}"
-
-
+    
 
 class Notification(models.Model):
     class NotificationType(models.TextChoices):
@@ -199,7 +161,6 @@ class Notification(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        db_table = 'users_notification'
         ordering = ['-created_at']
 
     def __str__(self):
