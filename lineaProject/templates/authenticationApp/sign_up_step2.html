@@ -1,0 +1,41 @@
+<h2>Registo - Passo 2</h2>
+
+{% if messages %}
+<ul>
+    {% for message in messages %}
+    <li>{{ message }}</li>
+    {% endfor %}
+</ul>
+{% endif %}
+
+<form method="POST">
+    {% csrf_token %}
+    <label>Nome completo:</label><br>
+    <input type="text" name="name" required><br>
+
+    <label>Nome de utilizador:</label><br>
+    <input type="text" name="username" required><br>
+
+    <label>Data de nascimento:</label><br>
+    <input type="date" name="birth_date"><br>
+
+    <label>Morada:</label><br>
+    <input type="text" name="address"><br>
+
+    <label>Cidade:</label><br>
+    <input type="text" name="city"><br>
+
+    <label>Código Postal:</label><br>
+    <input type="text" name="postal_code"><br>
+
+    <label>País:</label><br>
+    <input type="text" name="country"><br>
+
+    <label>Tipo de utilizador:</label><br>
+    <select name="user_type">
+        <option value="public">Public</option>
+        <option value="artist">Artist</option>
+    </select><br><br>
+
+    <button type="submit">Criar Conta</button>
+</form>

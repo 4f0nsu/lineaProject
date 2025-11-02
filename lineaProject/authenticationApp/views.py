@@ -9,69 +9,163 @@ from django.db import IntegrityError, transaction
 import re
 from .models import UserProfile
 
+# Sign-up step1
+import random
+from django.utils import timezone
+from datetime import timedelta
+from .models import PendingUser
+from django.contrib.auth.hashers import make_password
+from django.core.mail import send_mail
+from django.contrib.auth import get_user_model
 
-@csrf_protect
-def sign_up(request):
+def generate_code():
+    return str(random.randint(100000, 999999))  # 6 dígitos
+
+def sign_up_step1(request):
+    User = get_user_model()
+
     if request.method == "POST":
+        email = request.POST.get('email', '').strip().lower()
+        password = request.POST.get('password', '')
+        confirm_password = request.POST.get('confirm_password', '')
+
+        # Verifica se email ou username já existem
+        if User.objects.filter(email=email).exists():
+            messages.error(request, "Este email já está registado. Use outro.")
+            return redirect('sign_up_step1')
+
+        # Campos obrigatórios
+        if not all([email, password, confirm_password]):
+            messages.error(request, "Preencha todos os campos.")
+            return redirect('sign_up_step1')
+
+        # Validar email
         try:
-            name = request.POST.get('name', '').strip()
-            username = request.POST.get('username', '').strip()
-            email = request.POST.get('email', '').strip().lower()
-            password = request.POST.get('password', '')
-            birth_date = request.POST.get('birth_date')
-            address = request.POST.get('address', '')
-            city = request.POST.get('city', '')
-            postal_code = request.POST.get('postal_code', '')
-            country = request.POST.get('country', '')
-            user_type = request.POST.get('user_type', 'public')
+            validate_email(email)
+        except ValidationError:
+            messages.error(request, "Email inválido.")
+            return redirect('sign_up_step1')
 
-            # Validação de campos obrigatórios
-            if not all([username, email, password, name]):
-                messages.error(request, "Preencha todos os campos obrigatórios.")
-                return redirect('sign_up')
+        # Validar password
+        if password != confirm_password:
+            messages.error(request, "As passwords não coincidem.")
+            return redirect('sign_up_step1')
 
-            # Validação do email
-            try:
-                validate_email(email)
-            except ValidationError:
-                messages.error(request, "Por favor insira um email válido.")
-                return redirect('sign_up')
+        if len(password) < 8 or not any(c.isupper() for c in password) or not any(c.isdigit() for c in password):
+            messages.error(request, "A password deve ter pelo menos 8 caracteres, um número e uma letra maiúscula.")
+            return redirect('sign_up_step1')
 
-            # Validação da password 
-            if len(password) < 8 or not re.search(r'[A-Z]', password) or not re.search(r'[0-9]', password):
-                messages.error(request, "A password deve ter pelo menos 8 caracteres, um número e uma letra maiúscula.")
-                return redirect('sign_up')
+        # Gerar código de verificação
+        code = generate_code()
+        expires_at = timezone.now() + timedelta(minutes=15)
 
-            # Criar o utilizador 
-            with transaction.atomic():  # garante rollback se algo falhar
-                user = UserProfile.objects.create_user(
-                    username=username,
-                    email=email,
-                    password=password,
-                    name=name,
-                    birth_date=birth_date,
-                    address=address,
-                    city=city,
-                    postal_code=postal_code,
-                    country=country,
-                    user_type=user_type
-                )
-                user.save()
+        # Guardar PendingUser
+        pending, created = PendingUser.objects.update_or_create(
+            email=email,
+            defaults={
+                'password_hash': make_password(password),  # hash seguro
+                'verification_code': code,
+                'expires_at': timezone.now() + timedelta(minutes=15)
+            }
+        )
+
+        # Enviar email
+        send_mail(
+            subject="Código de verificação",
+            message=f"Seu código de verificação é: {code}",
+            from_email="no-reply@teusite.com",
+            recipient_list=[email],
+            fail_silently=False,
+        )
+
+        # Redirecionar para página de verificação
+        request.session['pending_email'] = email  # guardamos para o passo 2
+        messages.success(request, "Código enviado para o seu email. Verifique e continue o registo.")
+        return redirect('sign_up_verify_code')
+
+    return render(request, 'authenticationApp/sign_up_step1.html')
+
+def sign_up_verify_code(request):
+    email = request.session.get('pending_email')
+    if not email:
+        messages.error(request, "Sessão expirada. Comece novamente.")
+        return redirect('sign_up_step1')
+
+    if request.method == "POST":
+        input_code = request.POST.get('verification_code', '').strip()
+        try:
+            pending = PendingUser.objects.get(email=email)
+            if pending.is_expired():
+                pending.delete()
+                messages.error(request, "O código expirou. Tente novamente.")
+                return redirect('sign_up_step1')
+
+            if input_code != pending.verification_code:
+                messages.error(request, "Código inválido.")
+                return redirect('sign_up_verify_code')
+
+            # Código correto, avançar para Passo 2
+            request.session['verified_email'] = email
+            return redirect('sign_up_step2')
+
+        except PendingUser.DoesNotExist:
+            messages.error(request, "Código inválido. Comece novamente.")
+            return redirect('sign_up_step1')
+
+    return render(request, 'authenticationApp/sign_up_verify_code.html')
+
+def sign_up_step2(request):
+    email = request.session.get('verified_email')
+    if not email:
+        messages.error(request, "Sessão expirada. Comece novamente.")
+        return redirect('sign_up_step1')
+
+    if request.method == "POST":
+        name = request.POST.get('name', '').strip()
+        username = request.POST.get('username', '').strip()
+        birth_date = request.POST.get('birth_date')
+        address = request.POST.get('address', '')
+        city = request.POST.get('city', '')
+        postal_code = request.POST.get('postal_code', '')
+        country = request.POST.get('country', '')
+        user_type = request.POST.get('user_type', 'public')
+
+        if not all([name, username]):
+            messages.error(request, "Preencha todos os campos obrigatórios.")
+            return redirect('sign_up_step2')
+
+        try:
+            pending = PendingUser.objects.get(email=email)
+            if pending.is_expired():
+                pending.delete()
+                messages.error(request, "O código expirou. Comece novamente.")
+                return redirect('sign_up_step1')
+
+            user = UserProfile(
+                username=username,
+                email=email,
+                name=name,
+                birth_date=birth_date,
+                address=address,
+                city=city,
+                postal_code=postal_code,
+                country=country,
+                user_type=user_type
+            )
+            user.password = pending.password_hash  # hash já seguro
+            user.save()
+
+            # Remover PendingUser
+            pending.delete()
 
             messages.success(request, "Conta criada com sucesso! Pode agora iniciar sessão.")
             return redirect('sign_in')
 
-        except IntegrityError:
-            messages.error(request, "O nome de utilizador ou email já está registado.")
-            return redirect('sign_up')
-
         except Exception as e:
-            # logging opcional
-            print(f"[ERROR] Erro ao criar conta: {e}")
-            messages.error(request, "Ocorreu um erro inesperado. Tente novamente.")
-            return redirect('sign_up')
+            messages.error(request, f"Ocorreu um erro: {e}")
+            return redirect('sign_up_step2')
 
-    return render(request, 'authenticationApp/sign_up.html')
+    return render(request, 'authenticationApp/sign_up_step2.html')
 
 
 @csrf_protect

@@ -1,7 +1,22 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
+from django.utils import timezone
+from django.contrib.auth.hashers import make_password
 
-# Modelo customizado de utilizador
+# Create your models here.
+class PendingUser(models.Model):
+    email = models.EmailField(unique=True)
+    password_hash = models.CharField(max_length=255)
+    verification_code = models.CharField(max_length=6)
+    created_at = models.DateTimeField(auto_now_add=True)
+    expires_at = models.DateTimeField()
+
+    def is_expired(self):
+        return timezone.now() > self.expires_at
+
+    def set_password(self, raw_password):
+        self.password_hash = make_password(raw_password)
+
 class UserProfile(AbstractUser):
     class UserType(models.TextChoices):
         PUBLIC = 'public', 'Public'

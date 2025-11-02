@@ -1,0 +1,24 @@
+<!-- templates/authenticationApp/signup_step1.html -->
+<h2>Registo - Passo 1</h2>
+
+{% if messages %}
+<ul>
+    {% for message in messages %}
+    <li>{{ message }}</li>
+    {% endfor %}
+</ul>
+{% endif %}
+
+<form method="POST">
+    {% csrf_token %}
+    <label>Email:</label><br>
+    <input type="email" name="email" required><br>
+
+    <label>Password:</label><br>
+    <input type="password" name="password" required><br>
+
+    <label>Repetir Password:</label><br>
+    <input type="password" name="confirm_password" required><br><br>
+
+    <button type="submit">Enviar Código de Verificação</button>
+</form>
