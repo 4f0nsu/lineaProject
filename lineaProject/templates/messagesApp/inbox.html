@@ -1,0 +1,29 @@
+{% block content %}
+
+<h2>📥 As tuas conversas</h2>
+
+{% if conversations %}
+  <ul>
+    {% for convo in conversations %}
+      {% with last_msg=convo.last_message %}
+        {% if last_msg %}
+          {% for p in convo.participants.all %}
+            {% if p != user %}
+              <li>
+                <a href="{% url 'conversation' p.username %}">
+                  <strong>{{ p.username }}</strong> <br>
+                  <small>{{ last_msg.sender.username }}:</small> {{ last_msg.content|truncatechars:40 }} <br>
+                  <small>{{ last_msg.timestamp|date:"H:i d/m/Y" }}</small>
+                </a>
+              </li>
+            {% endif %}
+          {% endfor %}
+        {% endif %}
+      {% endwith %}
+    {% endfor %}
+  </ul>
+{% else %}
+  <p>Ainda não tens conversas.</p>
+{% endif %}
+
+{% endblock %}

@@ -1,0 +1,27 @@
+{% block content %}
+
+<h2>💬 Conversa com {{ other_user.username }}</h2>
+
+<div>
+  {% if messages %}
+    {% for message in messages %}
+      <div {% if message.sender == request.user %}align="right"{% endif %}>
+        <strong>{{ message.sender.username }}</strong>: {{ message.content }}
+        <br>
+        <small>{{ message.timestamp|date:"H:i" }}</small>
+      </div>
+    {% endfor %}
+  {% else %}
+    <p>Nenhuma mensagem ainda.</p>
+  {% endif %}
+</div>
+
+<form method="POST">
+  {% csrf_token %}
+  <textarea name="content" rows="3" placeholder="Escreve a tua mensagem..."></textarea><br>
+  <button type="submit">Enviar</button>
+</form>
+
+<p><a href="{% url 'messages:inbox' %}">⬅️ Voltar à caixa de entrada</a></p>
+
+{% endblock %}

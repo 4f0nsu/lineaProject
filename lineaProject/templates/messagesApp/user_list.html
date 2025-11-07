@@ -1,0 +1,19 @@
+
+{% block content %}
+
+<h2>Lista de utilizadores</h2>
+
+<ul>
+  {% for u in users %}
+    <li>
+      {{ u.username }} 
+      <a href="{% url 'messages:conversation' u.username %}">💬 Conversar</a>
+    </li>
+  {% empty %}
+    <li>Nenhum outro utilizador encontrado.</li>
+  {% endfor %}
+</ul>
+
+<p><a href="{% url 'posts:feed' %}">⬅️ Voltar ao feed</a></p>
+
+{% endblock %}
