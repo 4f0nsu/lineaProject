@@ -47,7 +47,7 @@ INSTALLED_APPS = [
     'homeApp.apps.HomeappConfig',
     'authenticationApp.apps.AuthenticationappConfig',
     'postsApp.apps.PostsappConfig',
-    'messagesApp.apps.MessagesappConfig',
+    'newsApp.apps.NewsappConfig',
 ]
 
 MIDDLEWARE = [

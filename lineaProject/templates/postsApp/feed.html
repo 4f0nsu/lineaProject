@@ -2,9 +2,7 @@
 <h2>Feed</h2>
 
 <a href="{% url 'posts:create' %}">Criar novo post</a>
-<a href="{% url 'messages:inbox' %}">Inbox</a>
-<a href="{% url 'messages:conversation' 'avvv'%}">Conversation</a>
-<a href="{% url 'messages:user_list'%}">User_list</a>
+<a href="{% url 'news:news_index' %}">Notícias</a>
 
 <hr>
 {% for post in posts %}

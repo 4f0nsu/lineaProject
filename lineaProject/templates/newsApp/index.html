@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<!-- Abas -->
+<div class="tabs">
+    <a href="{% url 'news:news_index' %}?tab=national" class="{% if tab == 'national' %}active{% endif %}">National</a>
+    <a href="{% url 'news:news_index' %}?tab=international" class="{% if tab == 'international' %}active{% endif %}">International</a>
+    <a href="{% url 'news:news_index' %}?tab=all" class="{% if tab == 'all' %}active{% endif %}">All</a>
+</div>
+
+<!-- Lista de artigos -->
+<div class="articles">
+    {% for article in page_obj %}
+        <article>
+            <h2><a href="{{ article.link }}">{{ article.title }}</a></h2>
+            <p>{{ article.published }}</p>
+            <p>Source: {{ article.source }} | {% if article.is_national %}Portugal{% else %}Internacional{% endif %}</p>
+        </article>
+    {% empty %}
+        <p>Nenhum artigo encontrado.</p>
+    {% endfor %}
+</div>
+
+<!-- Paginação -->
+<div class="pagination">
+    {% if page_obj.has_previous %}
+        <a href="{% url 'news:news_index' %}?tab={{ tab }}&page={{ page_obj.previous_page_number }}">Previous</a>
+    {% endif %}
+
+    Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}
+
+    {% if page_obj.has_next %}
+        <a href="{% url 'news:news_index' %}?tab={{ tab }}&page={{ page_obj.next_page_number }}">Next</a>
+    {% endif %}
+</div>
+
+{% endblock %}
